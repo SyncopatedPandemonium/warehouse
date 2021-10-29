@@ -1,215 +1,151 @@
-# Introduction
+# Collections
 
 ## Topics covered
 
-Command line input and output. Using variables, operators, basic math functions and control flow structures.
+Lists, dictionaries and other collection types. Working with dates and texts.
 
 ## Goal achieved
 
-By the end of the exercise you will have created a command line tool to consult items in stock and simulate placing orders.
+By the end of the exercise you will have upgraded your query command line tool to use a more complex data set and perform additional operations.
+
+More specifically, you will add the following features:
+
+- Add a total counter when listing all items.
+- Change the search to case insensitive.
+- The search will list all items matching, instead of indicating the number. For each item, it will also show the number of days it has been in stock.
+- Add a new menu option to browse the items by category.
 
 ## Data
 
-The source data are two lists, each one containing the names of all items in a warehouse. The current system has two different warehouses (1 and 2) and two different lists are provided.
+Replace the file `cli/data.py` in your repository with the file [sample/data.py](sample/data.py).
 
-The [sample directory](sample) in this repository has some sample data you can use to test your code with. The directory contains these files:
+This new file has a little more data and uses a list of dictionaries to describe the data. Each dictionary has the following keys:
 
-- **data.py**: this module contains the data. To make it easier to work, the data is placed in a different file and is loaded from the main script.
-- **query.py**: this module will contain your script. The first lines show a little help message and load the data into the module. You will have the lists available with the names `warehouse1` and `warehouse2`.
+- **state** *string*: The condition of the item (example: Brand new, old, cheap,...)
+- **category** *string*: The type of item (example: Laptop, Tablet, Headphones,...)
+- **warehouse** *integer*: The warehouse number where this item is located.
+- **date_of_stock** *date*: The date and time the item was stocked.
 
-You can copy these two files into your project repository.
-
-You will have to use these lists the way you have seen during the lecture with the `range` function.
-
-```python
-for item in warehouse1:
-    # instructions
-```
+The full name of the item will be a composition of `state` and `category`.
 
 ## Description
 
-Go to your repository and create a directory named `cli` (standing for Command Line Interface). Copy the files  `data.py` and `query.py` from the [sample](sample) directory to your repository directory.
+### Refactoring
 
-Edit the file `query.py` and write a script that produces the following workflow:
+After replacing the data, you will have to edit the `cli/query.py` file and the first thing you will have to do is changing the first line from:
 
-1. The user is asked to provide a name.
-1. The user is greeted by its name.
-1. A menu is printed out showing 3 options: `1. List items by warehouse`, `2. Search an item and place an order` and `3. Quit`.
-1. The user is asked to pick a choice using the numeric values associated.
-    1. If the user picked `1`, the script should print each of the items in each of the warehouses (first all items from a warehouse and then all items from the other). Then it should stop execution.
-    1. If the user picked `2`, the script should:
-        1. Ask the user to input an item name and search the warehouses.
-        1. The script will print:
-            1. The total amount of items in any warehouse that match that name.
-            2. The location of those items: the name of the warehouse (ex: `Warehouse 1`), if it can only be found in one, `Both warehouses` if it is in both and `Not in stock` if it is in none.
-            3. If it can be found in more than one warehouse, it will also print a line saying which warehouse has the highest amount of those items (and how many does it have).
-        1. Ask the user if they want to place an order for this item.
-            1. If the answer is no, it will do nothing else.
-            1. If the answer is yes, it should ask the user how many do they want.
-                1. If the desired amount is equal or lower than the total available, it will proceed and show a message saying the order has been placed. *The message should show the item name and amount ordered*.
-                1. If the desired amount is higher than the total available, it should show an error message and should ask the user if they want to order the maximum available, instead.
-                    1. If they answer yes, it will proceed and show a message saying the order has been placed. *The message should show the item name and amount ordered*.
-                    1. If they answer no, it will do nothing else.
-    1. If the user picked `3`, the script should do nothing else.
-    1. If the user types anything different than `1`, `2` or `3` it should show an error message indicating the operation entered is not valid.
-1. Display a final message thanking the user for the visit, using their name typed at the beginning.
+`from data import warehouse1, warehouse2`
+
+To:
+
+`from data import stock`
+
+After this, the first task will be to adapt the query tool to work with the new data structure.
+
+> Notice that the full name of each item is now a composition of the keys `state` and `category`. To replicate the current behavior, the script must compare the user input with the combination of `state` and `category`.
+
+Once all the current features are working as expected with the new data, add all those changes to the remote repository (add them locally, commit them with a meaningful text and push them).
+
+After that, add the following features/changes.
 
 > **IMPORTANT**
 >
-> Do not forget to push all the changes to the remote repository once you are done. Commit the changes with a meaningful description.
+> Do not forget to push all the changes to the remote repository again at the end of the exercise. Commit the changes with a meaningful description.
 
-> **Not enough?**
->
-> *If you want to do more you can pick some of these add-ons*.
-> - Use a while loop to let the user order multiple items during the same session.
+### Changes on menu option 1 (list all items)
 
-## Sample outputs
-You can use these samples to get a better idea of what the script should do. The text does not need to be exactly as it appears here. This is your project and you can adapt it as you wish, but the general flow should be as described.
+When printing the list of items, and at the end of the whole list, print the total amount of items in stock on each warehouse:
 
-**Listing all items**
+##### Sample output:
+
 ```
-What is your user name? Mathilda
-
-Hello, Mathilda!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
-Type the number of the operation: 1
-
-Items in warehouse 1:
-- Brand new laptop
-- Exceptional monitor
-- Cheap tablet
 ...
-- Second hand mouse
-Items in warehouse 2:
-- High quality tablet
-- Second hand headphones
+- High quality Tablet
+
+Total items in warehouse 1: ???
+Total items in warehouse 2: ???
+
+Thank you for your visit, Wolfgang!
+```
+
+### Changes on menu option 2 (search and place order)
+
+Change the search of the items (operation number `2`) so that:
+
+1. It produces the same result when typing `cheap tablet` and `CHEAP TABLET` (the search should be **case insensitive**).
+1. If the search returns at least one result (in any warehouse), it prints a list of all the items showing the name of the warehouse and the number of days it has passed since they were stocked.
+2. It still prints the maximum availability only when the item is found in more than one warehouse.
+3. It still prints `Location: Not in stock` when the item is not found.
+
+##### Sample outputs:
+
+```
 ...
-- Almost new router
-- High quality monitor
-
-Thank you for your visit, Mathilda!
-```
-**Search & found in 1 location, no order**
-
-```
-What is your user name? Martin
-
-Hello, Martin!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
-Type the number of the operation: 2
-
-What is the name of the item? Cheap tablet
-Amount available: 2
-Location: Warehouse 1
+What is the name of the item? funny headphones
+Amount available: 5
+Location:
+- Warehouse 1 (in stock for 905 days)
+- Warehouse 1 (in stock for 33 days)
+- Warehouse 1 (in stock for 193 days)
+- Warehouse 2 (in stock for 957 days)
+- Warehouse 2 (in stock for 188 days)
+Maximum availability: 3 in Warehouse 1
 
 Would you like to order this item?(y/n) n
-
-Thank you for your visit, Martin!
+...
 ```
-**Search & found in 2 locations. Order more than available and accepting maximum.**
-
 ```
-What is your user name? Mathilda
-
-Hello, Mathilda!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
-Type the number of the operation: 2
-
-What is the name of the item? Almost new router
-Amount available: 3
-Location: Both warehouses
-Maximum availability: 2 in Warehouse 2
-
-Would you like to order this item?(y/n) y
-How many would you like? 4
-**************************************************
-There are not this many available. The maximum amount that can be ordered is 3
-**************************************************
-Would you like to order the maximum available?(y/n) y
-3 Almost new router have been ordered.
-
-Thank you for your visit, Mathilda!
-```
-**Order more than available and not accepting maximum.**
-
-```
-What is your user name? Ruth
-
-Hello, Ruth!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
-Type the number of the operation: 2
-
-What is the name of the item? Second hand headphones
-Amount available: 8
-Location: Both warehouses
-Maximum availability: 4 in Warehouse 1
-
-Would you like to order this item?(y/n) y
-How many would you like? 10
-**************************************************
-There are not this many available. The maximum amount that can be ordered is 8
-**************************************************
-Would you like to order the maximum available?(y/n) n
-
-Thank you for your visit, Ruth!
-```
-**Item not found.**
-```
-What is your user name? Leia
-
-Hello, Leia!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
-Type the number of the operation: 2
-
-What is the name of the item? Bigger headphones
+...
+What is the name of the item? bigger headphones
 Amount available: 0
 Location: Not in stock
-
-Thank you for your visit, Leia!
+...
 ```
-**Unsupported operation.**
-```
-What is your user name? Sherlock
 
-Hello, Sherlock!
+### New menu option (browse by category)
+
+Add a new menu option named `Browse by category`. Assign it the number 3 and move down the `Quit` option to number 4. When selected, this option should:
+
+1. Show a menu of available categories. This menu will have to include a numeric code (the number the user will type in to select a category), the name of the category and the amount of items available in that category (in any warehouse).
+
+    > There is no list of categories in the dataset, so you will have to iterate all the stock to identify the categories and count their items.
+    >
+    > You will also have to find a way to produce a numeric identifier for each category.
+    >
+    > The menu list should show single categories (each category should only appear once).
+
+1. Ask the user to type the category number of their choice.
+1. List all items in that category. This time, print them one after the other (not separated by warehouse) and include the name of the warehouse at the end of each line.
+
+    > Be aware that the code associated to each category will be an auto-generated numeric code and the items have a text value as category. You will have to think of a way to identify each number typed by the user to the correct category name to be able to filter the stock.
+
+##### Sample output:
+
+```
+What is your user name? Example
+
+Hello, Example!
 What would you like to do?
 1. List items by warehouse
 2. Search an item and place an order
-3. Quit
-Type the number of the operation: Search
-
-**************************************************
-Search is not a valid operation.
-**************************************************
-
-Thank you for your visit, Sherlock!
-```
-**Quit.**
-```
-What is your user name? John Doe
-
-Hello, John Doe!
-What would you like to do?
-1. List items by warehouse
-2. Search an item and place an order
-3. Quit
+3. Browse by category
+4. Quit
 Type the number of the operation: 3
 
+1. Keyboard (34)
+2. Smartphone (39)
+3. Mouse (39)
+4. Laptop (40)
+5. Headphones (37)
+6. Monitor (40)
+7. Router (30)
+8. Tablet (41)
+Type the number of the category to browse: 4
 
-Thank you for your visit, John Doe!
+List of laptops available:
+Exceptional laptop, Warehouse 2
+...
+Second hand laptop, Warehouse 1
+
+Thank you for your visit, Example!
 ```

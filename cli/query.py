@@ -1,4 +1,19 @@
-from data import warehouse1, warehouse2
+#from data_old import warehouse1, warehouse2
+
+import json
+
+with open('/Users/temporaryadmin/projects/warehouse/cli/data.json', 'r') as f:
+    data = json.loads(f.read())
+
+def full_name_of_item(item_info: dict) ->str:
+    return f"{item_info['state']} {item_info['category']}"
+
+def items_in_warehouse(data: list, warehouse_number: int) -> list:
+    return [full_name_of_item(item) for item in data if item['warehouse']==warehouse_number]
+
+warehouse1 = items_in_warehouse(data, 1)
+warehouse2 = items_in_warehouse(data, 2)
+
 
 user_name = ""
 while len(user_name) == 0:
@@ -13,12 +28,13 @@ operations = input(
     )
 
 if operations == "1":
-    print("\nItems in warehouse 1:")
-    for item in set(warehouse1):
-        print(f"- {item}")
-    print("\nItems in warehouse 2:")
-    for item in set(warehouse2):
-        print(f"- {item}")
+    print("\nItems in warehouse:")
+    for item in list(set(warehouse1+warehouse2)):
+        print(f"\n- {item}\n")
+        print(f"Total items in warehouse 1: {warehouse1.count(item)}")
+        print(f"Total items in warehouse 2: {warehouse2.count(item)}")
+
+
 elif operations == "2":
     chosen_item = input("\nWhat is the name of the item? ")  # Letting user choose the item
     amount_available1 = warehouse1.count(chosen_item)
