@@ -1,58 +1,85 @@
 #from data_old import warehouse1, warehouse2
+from datetime import datetime
 
 import json
 
 with open('/Users/temporaryadmin/projects/warehouse/cli/data.json', 'r') as f:
-    data = json.loads(f.read())
+    stock = json.loads(f.read())
 
 def full_name_of_item(item_info: dict) ->str:
     return f"{item_info['state']} {item_info['category']}"
 
-def items_in_warehouse(data: list, warehouse_number: int) -> list:
-    return [full_name_of_item(item) for item in data if item['warehouse']==warehouse_number]
+def items_in_warehouse_lower_case(warehouse_number: int, data:dict = stock ) -> list:
+    return [full_name_of_item(item).lower() for item in data if item['warehouse'] == warehouse_number]
 
-warehouse1 = items_in_warehouse(data, 1)
-warehouse2 = items_in_warehouse(data, 2)
+def is_in_warehouse(item_name: str, warehouse_number: int) -> bool:
+        return True if item_name in items_in_warehouse_lower_case(warehouse_number) else False
 
+def amount_in_warehouse(item_name: str, warehouse_number: int) -> int:
+    return items_in_warehouse_lower_case(warehouse_number).count(item_name)
+
+def days_in_warehouse(item_name):
+        today = datetime.today()
+        in_stock_date = datetime.fromisoformat(item_name['date_of_stock'])
+        days = (today - in_stock_date).days
+        return item_name['warehouse'], days
+
+
+
+warehouse1 = items_in_warehouse_lower_case(1)
+warehouse2 = items_in_warehouse_lower_case(2)
 
 user_name = ""
 while len(user_name) == 0:
-    user_name = input("What is your user name? ")
+    user_name = input("What is your user name? ").capitalize()
 print(f"\nHello, {user_name}!\n"
     "What would you like to do?")
 
-operations = input(
-    "1. List all items\n"
-    "2. Search an item and place an order\n"
-    "3. Quit\nType the number of the operation: "
-    )
+operations = ""
+while operations == "":
+    operations = input(
+        "1. List all items\n"
+        "2. Search an item and place an order\n"
+        "3. Quit\nType the number of the operation: "
+        )
 
 if operations == "1":
     print("\nItems in warehouse:")
-    for item in list(set(warehouse1+warehouse2)):
+    for item in set(warehouse1+warehouse2):
         print(f"\n- {item}\n")
-        print(f"Total items in warehouse 1: {warehouse1.count(item)}")
-        print(f"Total items in warehouse 2: {warehouse2.count(item)}")
-
+        print(f"Total items in warehouse 1: {amount_in_warehouse(item,1)}")
+        print(f"Total items in warehouse 2: {amount_in_warehouse(item,2)}")
 
 elif operations == "2":
-    chosen_item = input("\nWhat is the name of the item? ")  # Letting user choose the item
-    amount_available1 = warehouse1.count(chosen_item)
-    amount_available2 = warehouse2.count(chosen_item)
-    amount_available = int(amount_available1) + int(amount_available2)  # total amount of items in both warehouses
-    print(f"Amount available: {amount_available}")
+    chosen_item = input("\nWhat is the name of the item? ").lower() # Letting user choose the item
     if chosen_item in warehouse1 and chosen_item in warehouse2:  # chosen item in both warehouses
-        print(f"Location: Both warehouses")
-        if amount_available2 > amount_available1:
+        amount_available1 = amount_in_warehouse(chosen_item,1)
+        amount_available2 = amount_in_warehouse(chosen_item,2)
+        amount_available = int(amount_available1) + int(amount_available2)  # total amount of items in both warehouses
+        print(f"Amount available: {amount_available}")
+        print(f"Location:")
+        for item in stock:
+            if full_name_of_item(item).lower() == chosen_item:
+                warehouse_number, days = days_in_warehouse(item)
+                print(f"Warehouse {warehouse_number} in stock for {days} days.")
+        if amount_in_warehouse(chosen_item,2) > amount_in_warehouse(chosen_item,1):
             print(f"Maximum availability: {amount_available2} in Warehouse 2.")
         elif amount_available2 < amount_available1:
             print(f"Maximum availability: {amount_available1} in Warehouse 1.")
         else:
             print(f"Borh warehouses have the same amount of item: {amount_available1}.")
     elif chosen_item in warehouse1:  # chosen item in warehouse 1
-        print(f"Location: Warehouse 1")
+        for item in stock:
+            if full_name_of_item(item).lower() == chosen_item:
+                warehouse_number, days = days_in_warehouse(item)
+                print(f"Warehouse {warehouse_number} in stock for {days} days.")
+        #print(f"Location: Warehouse 1")
     elif chosen_item in warehouse2:  # chosen item in warehouse 2
-        print(f"Location: Warehouse 2")
+        for item in stock:
+            if full_name_of_item(item).lower() == chosen_item:
+                warehouse_number, days = days_in_warehouse(item)
+                print(f"Warehouse {warehouse_number} in stock for {days} days.")
+        #print(f"Location: Warehouse 2")
     else:    # chosen item not in stock
         print(f"Location: Not in stock")
 
