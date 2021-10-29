@@ -22,7 +22,7 @@ print(f"\nHello, {user_name}!\n"
     "What would you like to do?")
 
 operations = input(
-    "1. List items by warehouse\n"
+    "1. List all items\n"
     "2. Search an item and place an order\n"
     "3. Quit\nType the number of the operation: "
     )
