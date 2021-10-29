@@ -52,11 +52,11 @@ if operations == "1":
 
 elif operations == "2":
     chosen_item = input("\nWhat is the name of the item? ").lower() # Letting user choose the item
+    amount_available1 = amount_in_warehouse(chosen_item,1)
+    amount_available2 = amount_in_warehouse(chosen_item,2)
+    amount_available = int(amount_available1) + int(amount_available2)  # total amount of items in both warehouses
+    print(f"Amount available: {amount_available}")
     if chosen_item in warehouse1 and chosen_item in warehouse2:  # chosen item in both warehouses
-        amount_available1 = amount_in_warehouse(chosen_item,1)
-        amount_available2 = amount_in_warehouse(chosen_item,2)
-        amount_available = int(amount_available1) + int(amount_available2)  # total amount of items in both warehouses
-        print(f"Amount available: {amount_available}")
         print(f"Location:")
         for item in stock:
             if full_name_of_item(item).lower() == chosen_item:
