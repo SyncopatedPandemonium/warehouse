@@ -7,7 +7,8 @@ with open('/Users/temporaryadmin/projects/warehouse/cli/data.json', 'r') as f:
     stock = json.loads(f.read())
 
 def plural_name(name: str) -> str:
-    return name + 's' if name[-1] != 's' else name
+    print(name)
+    return name + 's' if name[-1].lower() != 's' else name
 
 # everything to do with just one item (dictionary) goes here
 class Item:
@@ -167,9 +168,9 @@ class WarehouseOperator:
 
         if amount_to_order <= total_amount:
             if amount_to_order == 1:
-                print(f"\n{amount_to_order} {self.storage.matching_item_name(item)} has been ordered")
+                print(f"\n{amount_to_order} {self.storage.matching_item_name(item.lower())} has been ordered")
             else:
-                print(f"\n{amount_to_order} {plural_name(self.storage.matching_item_name(item))} have been ordered.")
+                print(f"\n{amount_to_order} {plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")
             return
 
         message = f"There are not this many available. The maximum amount that can be ordered is {total_amount}"
@@ -182,9 +183,9 @@ class WarehouseOperator:
         if order_option2 == "n":
             return
         if total_amount == 1:
-            print(f"\n{total_amount} {self.storage.matching_item_name(item)} have been ordered.")
+            print(f"\n{total_amount} {self.storage.matching_item_name(item.lower())} have been ordered.")
         else:
-            print(f"\n{total_amount} {plural_name(self.storage.matching_item_name(item))} have been ordered.")               
+            print(f"\n{total_amount} {plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")               
 
     def _print_error(self, message) -> str:
         print()
