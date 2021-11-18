@@ -2,13 +2,9 @@ from datetime import datetime
 
 import json
 
-
 with open('/Users/temporaryadmin/projects/warehouse/cli/data.json', 'r') as f:
     stock = json.loads(f.read())
 
-def plural_name(name: str) -> str:
-    print(name)
-    return name + 's' if name[-1].lower() != 's' else name
 
 # everything to do with just one item (dictionary) goes here
 class Item:
@@ -78,6 +74,10 @@ class Storage:
             if item.name().lower() == input_name:
                 return item.name()
 
+    def plural_name(self, name: str) -> str:
+        print(name)
+        return name + 's' if name[-1].lower() != 's' else name
+
 # every input and print goes here
 class WarehouseOperator:
     """Runs the operations"""
@@ -114,7 +114,6 @@ class WarehouseOperator:
 
     def operation2(self):
         choice = input("\nWhat is the name of the item?: ")
-        print(1, choice)
         amount_in_warehouse1 = self.storage.count_in_warehouse(1, choice)
         amount_in_warehouse2 = self.storage.count_in_warehouse(2, choice)
         total_amount = amount_in_warehouse1 + amount_in_warehouse2
@@ -128,17 +127,16 @@ class WarehouseOperator:
             elif amount_in_warehouse2 > amount_in_warehouse1:
                 print(f"\nMaximum availability: {amount_in_warehouse2} in Warehouse 2.")
             else:
-                print(f"Borh warehouses have the same amount of item: {amount_in_warehouse1}.")
+                print(f"\nBorh warehouses have the same amount of item: {amount_in_warehouse1}.")
         
         if total_amount > 0:
-            print(2, choice)
             self._order_operation(choice, total_amount)
             
 
     def operation3(self):
         self._category_menu()
         category = self._choose_category()
-        print(f"\nList of {plural_name(category.lower())} availabe:\n")
+        print(f"\nList of {self.storage.plural_name(category.lower())} availabe:\n")
         for item in self.storage.items_in_category(category):
             print(item.name_warehouse_info())
         print()
@@ -170,7 +168,7 @@ class WarehouseOperator:
             if amount_to_order == 1:
                 print(f"\n{amount_to_order} {self.storage.matching_item_name(item.lower())} has been ordered")
             else:
-                print(f"\n{amount_to_order} {plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")
+                print(f"\n{amount_to_order} {self.storage.plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")
             return
 
         message = f"There are not this many available. The maximum amount that can be ordered is {total_amount}"
@@ -185,7 +183,7 @@ class WarehouseOperator:
         if total_amount == 1:
             print(f"\n{total_amount} {self.storage.matching_item_name(item.lower())} have been ordered.")
         else:
-            print(f"\n{total_amount} {plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")               
+            print(f"\n{total_amount} {self.storage.plural_name(self.storage.matching_item_name(item.lower()))} have been ordered.")               
 
     def _print_error(self, message) -> str:
         print()
